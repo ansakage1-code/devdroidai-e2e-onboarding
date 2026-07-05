@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -23,11 +24,15 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.e2e.memopad.R
 import com.e2e.memopad.domain.Memo
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 /**
  * メモ帳の画面。入力欄 + 追加ボタン + メモ一覧。
@@ -95,23 +100,39 @@ fun MemoScreen(
 @Composable
 private fun MemoRow(memo: Memo, onDelete: () -> Unit) {
     Card(modifier = Modifier.fillMaxWidth()) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 16.dp, end = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
+                .padding(start = 16.dp, end = 8.dp, top = 16.dp, bottom = 16.dp),
         ) {
-            Text(
-                text = memo.text,
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(vertical = 16.dp),
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-            )
-            TextButton(onClick = onDelete) {
-                Text(stringResource(R.string.delete_button))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = memo.text,
+                    modifier = Modifier.weight(1f),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                TextButton(onClick = onDelete) {
+                    Text(stringResource(R.string.delete_button))
+                }
             }
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = formatDate(memo.createdAt),
+                style = MaterialTheme.typography.labelSmall,
+                color = Color.Gray,
+            )
         }
     }
+}
+
+/**
+ * ミリ秒単位の UNIX タイムスタンプを「yyyy/MM/dd HH:mm」形式の文字列に変換する。
+ */
+private fun formatDate(timestamp: Long): String {
+    val formatter = SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.getDefault())
+    return formatter.format(Date(timestamp))
 }
