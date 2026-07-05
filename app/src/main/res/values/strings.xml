@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">メモ帳</string>
+    <string name="input_hint">メモを入力</string>
+    <string name="add_button">追加</string>
+    <string name="delete_button">削除</string>
+    <string name="delete_desc">このメモを削除</string>
+    <string name="empty_hint">まだメモがありません。上の欄から追加してください。</string>
+</resources>
