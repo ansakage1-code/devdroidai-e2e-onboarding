@@ -5,10 +5,12 @@ package com.e2e.memopad.domain
  *
  * @param id   一意の識別子（削除時の対象特定に使う）
  * @param text メモ本文
+ * @param createdAt メモの作成日時（ミリ秒単位）
  */
 data class Memo(
     val id: Long,
     val text: String,
+    val createdAt: Long = System.currentTimeMillis(),
 )
 
 /**
