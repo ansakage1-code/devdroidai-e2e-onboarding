@@ -31,7 +31,7 @@ class MainActivity : ComponentActivity() {
                     input = input,
                     onInputChange = { input = it },
                     onAdd = {
-                        memos = MemoLogic.add(memos, input, id = nextId(memos))
+                        memos = MemoLogic.add(memos, input, id = nextId(memos), createdAt = System.currentTimeMillis())
                         input = ""
                         store.save(memos)
                     },
@@ -59,7 +59,11 @@ private class MemoStore(context: Context) {
             val arr = JSONArray(raw)
             (0 until arr.length()).map { i ->
                 val o = arr.getJSONObject(i)
-                Memo(id = o.getLong("id"), text = o.getString("text"))
+                Memo(
+                    id = o.getLong("id"),
+                    text = o.getString("text"),
+                    createdAt = o.optLong("createdAt", 0L),
+                )
             }
         }.getOrDefault(emptyList())
     }
@@ -67,7 +71,7 @@ private class MemoStore(context: Context) {
     fun save(memos: List<Memo>) {
         val arr = JSONArray()
         memos.forEach { m ->
-            arr.put(JSONObject().put("id", m.id).put("text", m.text))
+            arr.put(JSONObject().put("id", m.id).put("text", m.text).put("createdAt", m.createdAt))
         }
         prefs.edit().putString(KEY, arr.toString()).apply()
     }
