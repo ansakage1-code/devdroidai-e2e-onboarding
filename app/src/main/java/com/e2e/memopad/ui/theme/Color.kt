@@ -11,3 +11,8 @@ val PurpleGrey40 = Color(0xFF625b71)
 val Pink40 = Color(0xFF7D5260)
 
 val ButtonBlue = Color(0xFF007AFF)
+
+// 3色グラデーション背景用の色定義
+val GradientDarkBlue = Color(0xFF0B2447)
+val GradientCyan = Color(0xFF00D9FF)
+val GradientPurple = Color(0xFF7B2CBF)
