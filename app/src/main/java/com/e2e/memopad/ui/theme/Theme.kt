@@ -10,7 +10,6 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 
 private val DarkColorScheme = darkColorScheme(
     primary = Color(0xFF58A6FF),
@@ -26,12 +25,6 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun Typography() = androidx.compose.material3.Typography()
-
-private val Shape = androidx.compose.material3.Shapes(
-    small = androidx.compose.foundation.shape.RoundedCornerShape(4.dp),
-    medium = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
-    large = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
-)
 
 @Composable
 fun MemopadTheme(
@@ -53,7 +46,6 @@ fun MemopadTheme(
     MaterialTheme(
         colorScheme = colorScheme,
         typography = Typography(),
-        shapes = Shape,
         content = content
     )
 }
