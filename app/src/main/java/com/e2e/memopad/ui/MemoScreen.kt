@@ -1,5 +1,6 @@
 package com.e2e.memopad.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -24,12 +25,16 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.e2e.memopad.R
 import com.e2e.memopad.domain.Memo
+import com.e2e.memopad.ui.theme.GradientCyan
+import com.e2e.memopad.ui.theme.GradientDarkBlue
+import com.e2e.memopad.ui.theme.GradientPurple
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -50,8 +55,14 @@ fun MemoScreen(
     onDelete: (Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val gradientBrush = Brush.verticalGradient(
+        colors = listOf(GradientDarkBlue, GradientCyan, GradientPurple)
+    )
+
     Scaffold(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier
+            .fillMaxSize()
+            .background(gradientBrush),
         topBar = { TopAppBar(title = { Text(stringResource(R.string.app_name)) }) },
     ) { padding ->
         Column(
