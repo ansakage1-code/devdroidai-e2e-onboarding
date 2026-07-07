@@ -102,7 +102,7 @@ fun MemoScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     contentPadding = PaddingValues(top = 12.dp),
                 ) {
-                    items(memos, key = { it.id }) { memo ->
+                    items(memos.sortedByDescending { it.createdAt }, key = { it.id }) { memo ->
                         MemoRow(
                             memo = memo,
                             onDelete = { onDelete(memo.id) },
