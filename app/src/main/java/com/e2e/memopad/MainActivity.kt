@@ -39,6 +39,10 @@ class MainActivity : ComponentActivity() {
                         memos = MemoLogic.remove(memos, id)
                         store.save(memos)
                     },
+                    onEdit = { id, newText ->
+                        memos = MemoLogic.update(memos, id, newText)
+                        store.save(memos)
+                    },
                 )
             }
         }
