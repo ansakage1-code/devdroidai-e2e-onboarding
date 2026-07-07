@@ -43,8 +43,8 @@ import java.util.Locale
 /**
  * メモ帳の画面。入力欄 + 追加ボタン + メモ一覧。
  *
- * ローカル状態として editingMemoId と editText を持ち、
- * 編集ダイアログの表示/非表示と入力内容を管理します。
+ * ローカル状態として editingMemoId、editText、searchQuery を持ち、
+ * 編集ダイアログの表示/非表示と入力内容、検索キーワードを管理します。
  *
  * グローバル状態（memos, input）は呼び出し側（MainActivity）から受け取ります。
  */
@@ -63,10 +63,21 @@ fun MemoScreen(
     var editingMemoId by remember { mutableStateOf<Long?>(null) }
     // ローカル状態：編集テキスト
     var editText by remember { mutableStateOf("") }
+    // ローカル状態：検索キーワード
+    var searchQuery by remember { mutableStateOf("") }
+
+    // フィルタ済みのメモ一覧（検索キーワードで大文字小文字区別なし検索）
+    val filteredMemos = if (searchQuery.isBlank()) {
+        memos
+    } else {
+        memos.filter { memo ->
+            memo.text.contains(searchQuery, ignoreCase = true)
+        }
+    }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        topBar = { TopAppBar(title = { Text(stringResource(R.string.app_name)) }) },
+        topAppBar = { TopAppBar(title = { Text(stringResource(R.string.app_name)) }) },
     ) { padding ->
         Column(
             modifier = Modifier
@@ -89,7 +100,18 @@ fun MemoScreen(
             }
             Spacer(modifier = Modifier.height(4.dp))
 
-            if (memos.isEmpty()) {
+            // 検索欄
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp),
+                singleLine = true,
+                label = { Text("Search") },
+            )
+
+            if (filteredMemos.isEmpty()) {
                 Text(
                     text = stringResource(R.string.empty_hint),
                     modifier = Modifier
@@ -102,7 +124,7 @@ fun MemoScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     contentPadding = PaddingValues(top = 12.dp),
                 ) {
-                    items(memos, key = { it.id }) { memo ->
+                    items(filteredMemos, key = { it.id }) { memo ->
                         MemoRow(
                             memo = memo,
                             onDelete = { onDelete(memo.id) },
