@@ -1,5 +1,6 @@
 package com.e2e.memopad.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,6 +14,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.DismissDirection
+import androidx.compose.material.DismissValue
+import androidx.compose.material.SwipeToDismiss
+import androidx.compose.material.rememberDismissState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -147,36 +152,71 @@ private fun MemoRow(
     onDelete: () -> Unit,
     onEdit: (String) -> Unit,
 ) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onEdit(memo.text) },
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 16.dp, end = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = memo.text,
-                    modifier = Modifier.padding(vertical = 8.dp),
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                )
-                Text(
-                    text = SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.getDefault()).format(Date(memo.createdAt)),
-                    modifier = Modifier.padding(bottom = 8.dp),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = Color.Gray,
-                )
-            }
-            TextButton(onClick = onDelete) {
-                Text(stringResource(R.string.delete_button))
+    val dismissState = rememberDismissState(
+        confirmStateChange = { dismissValue ->
+            if (dismissValue == DismissValue.DismissedToEnd || dismissValue == DismissValue.DismissedToStart) {
+                onDelete()
+                true
+            } else {
+                false
             }
         }
-    }
+    )
+
+    SwipeToDismiss(
+        state = dismissState,
+        modifier = Modifier.fillMaxWidth(),
+        directions = setOf(DismissDirection.StartToEnd, DismissDirection.EndToStart),
+        background = {
+            val backgroundColor = Color.Red
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(backgroundColor)
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+            ) {
+                Text(
+                    text = stringResource(R.string.delete_button),
+                    color = Color.White,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+        },
+        dismissContent = {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onEdit(memo.text) },
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, end = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = memo.text,
+                            modifier = Modifier.padding(vertical = 8.dp),
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                        Text(
+                            text = SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.getDefault()).format(Date(memo.createdAt)),
+                            modifier = Modifier.padding(bottom = 8.dp),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color.Gray,
+                        )
+                    }
+                    TextButton(onClick = onDelete) {
+                        Text(stringResource(R.string.delete_button))
+                    }
+                }
+            }
+        }
+    )
 }
 
 @Composable
