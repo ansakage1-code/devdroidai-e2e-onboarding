@@ -38,4 +38,21 @@ object MemoLogic {
     fun remove(memos: List<Memo>, id: Long): List<Memo> {
         return memos.filterNot { it.id == id }
     }
+
+    /**
+     * 指定 id のメモの本文と編集日時を更新した新しいリストを返す。
+     * 空白のみ（trim 後に空）の text は更新しない（元のリストをそのまま返す）。
+     * 該当する id がなければ元と同じ内容のリストを返す。
+     */
+    fun edit(memos: List<Memo>, id: Long, text: String, editedAt: Long): List<Memo> {
+        val trimmed = text.trim()
+        if (trimmed.isEmpty()) return memos
+        return memos.map { memo ->
+            if (memo.id == id) {
+                memo.copy(text = trimmed, createdAt = editedAt)
+            } else {
+                memo
+            }
+        }
+    }
 }
