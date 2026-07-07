@@ -66,7 +66,13 @@ fun MemoScreen(
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        topBar = { TopAppBar(title = { Text(stringResource(R.string.app_name)) }) },
+        topBar = { 
+            TopAppBar(
+                title = { 
+                    Text("${stringResource(R.string.app_name)} (${memos.size}件)")
+                }
+            )
+        },
     ) { padding ->
         Column(
             modifier = Modifier
