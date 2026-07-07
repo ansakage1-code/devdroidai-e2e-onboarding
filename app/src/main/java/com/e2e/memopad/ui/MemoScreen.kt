@@ -1,5 +1,6 @@
 package com.e2e.memopad.ui
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -22,6 +24,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -37,8 +43,10 @@ import java.util.Locale
 /**
  * メモ帳の画面。入力欄 + 追加ボタン + メモ一覧。
  *
- * 状態は持たず、呼び出し側（MainActivity）から memos と各コールバックを受け取る
- * stateless Composable。
+ * ローカル状態として editingMemoId と editText を持ち、
+ * 編集ダイアログの表示/非表示と入力内容を管理します。
+ *
+ * グローバル状態（memos, input）は呼び出し側（MainActivity）から受け取ります。
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,8 +56,14 @@ fun MemoScreen(
     onInputChange: (String) -> Unit,
     onAdd: () -> Unit,
     onDelete: (Long) -> Unit,
+    onEdit: (id: Long, newText: String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // ローカル状態：編集中のメモID（null なら非表示）
+    var editingMemoId by remember { mutableStateOf<Long?>(null) }
+    // ローカル状態：編集テキスト
+    var editText by remember { mutableStateOf("") }
+
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = { TopAppBar(title = { Text(stringResource(R.string.app_name)) }) },
@@ -89,17 +103,49 @@ fun MemoScreen(
                     contentPadding = PaddingValues(top = 12.dp),
                 ) {
                     items(memos, key = { it.id }) { memo ->
-                        MemoRow(memo = memo, onDelete = { onDelete(memo.id) })
+                        MemoRow(
+                            memo = memo,
+                            onDelete = { onDelete(memo.id) },
+                            onEdit = { text ->
+                                editingMemoId = memo.id
+                                editText = text
+                            },
+                        )
                     }
                 }
             }
+        }
+
+        // 編集ダイアログ
+        if (editingMemoId != null) {
+            EditMemoDialog(
+                text = editText,
+                onTextChange = { editText = it },
+                onSave = {
+                    onEdit(editingMemoId!!, editText)
+                    editingMemoId = null
+                    editText = ""
+                },
+                onCancel = {
+                    editingMemoId = null
+                    editText = ""
+                },
+            )
         }
     }
 }
 
 @Composable
-private fun MemoRow(memo: Memo, onDelete: () -> Unit) {
-    Card(modifier = Modifier.fillMaxWidth()) {
+private fun MemoRow(
+    memo: Memo,
+    onDelete: () -> Unit,
+    onEdit: (String) -> Unit,
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onEdit(memo.text) },
+    ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -125,4 +171,36 @@ private fun MemoRow(memo: Memo, onDelete: () -> Unit) {
             }
         }
     }
+}
+
+@Composable
+private fun EditMemoDialog(
+    text: String,
+    onTextChange: (String) -> Unit,
+    onSave: () -> Unit,
+    onCancel: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onCancel,
+        title = { Text(stringResource(R.string.edit_title)) },
+        text = {
+            OutlinedTextField(
+                value = text,
+                onValueChange = onTextChange,
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = false,
+                label = { Text(stringResource(R.string.edit_hint)) },
+            )
+        },
+        confirmButton = {
+            Button(onClick = onSave, enabled = text.isNotBlank()) {
+                Text(stringResource(R.string.save_button))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onCancel) {
+                Text(stringResource(R.string.cancel_button))
+            }
+        },
+    )
 }
