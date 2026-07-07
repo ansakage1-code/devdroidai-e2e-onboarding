@@ -48,4 +48,41 @@ class ExampleUnitTest {
         val result = MemoLogic.remove(memos, id = 99L)
         assertEquals(1, result.size)
     }
+
+    @Test
+    fun update_replacesTextForMatchingId() {
+        val memos = listOf(
+            Memo(1L, "買い物", createdAt = 1000L),
+            Memo(2L, "読書", createdAt = 2000L)
+        )
+        val result = MemoLogic.update(memos, id = 1L, "  掃除  ")
+        assertEquals(2, result.size)
+        assertEquals("掃除", result[0].text) // id=1 のテキストが更新される
+        assertEquals(1L, result[0].id)
+        assertEquals("読書", result[1].text) // id=2 は変わらず
+    }
+
+    @Test
+    fun update_ignoresBlankInput() {
+        val memos = listOf(Memo(1L, "買い物", createdAt = 1000L))
+        val result = MemoLogic.update(memos, id = 1L, "   ")
+        assertEquals(1, result.size)
+        assertEquals("買い物", result[0].text) // 空白のみなら更新されない
+    }
+
+    @Test
+    fun update_noMatchKeepsAll() {
+        val memos = listOf(Memo(1L, "買い物", createdAt = 1000L))
+        val result = MemoLogic.update(memos, id = 99L, "新しいテキスト")
+        assertEquals(1, result.size)
+        assertEquals("買い物", result[0].text) // id が見つからなければ変わらず
+    }
+
+    @Test
+    fun update_isImmutable() {
+        val original = listOf(Memo(1L, "a", createdAt = 1000L))
+        val result = MemoLogic.update(original, id = 1L, "b")
+        assertEquals("a", original[0].text) // 元のリストは不変
+        assertEquals("b", result[0].text)
+    }
 }
