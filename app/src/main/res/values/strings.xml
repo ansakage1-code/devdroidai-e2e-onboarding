@@ -5,4 +5,8 @@
     <string name="delete_button">削除</string>
     <string name="delete_desc">このメモを削除</string>
     <string name="empty_hint">まだメモがありません。上の欄から追加してください。</string>
+    <string name="edit_title">メモを編集</string>
+    <string name="edit_hint">メモを編集</string>
+    <string name="save_button">保存</string>
+    <string name="cancel_button">キャンセル</string>
 </resources>
