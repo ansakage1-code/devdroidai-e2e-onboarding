@@ -48,4 +48,31 @@ class ExampleUnitTest {
         val result = MemoLogic.remove(memos, id = 99L)
         assertEquals(1, result.size)
     }
+
+    @Test
+    fun edit_updatesTextAndTimestamp() {
+        val original = listOf(Memo(1L, "old text", createdAt = 1000L), Memo(2L, "b", createdAt = 2000L))
+        val result = MemoLogic.edit(original, id = 1L, text = "  new text  ", editedAt = 3000L)
+        assertEquals(2, result.size)
+        assertEquals("new text", result[0].text)
+        assertEquals(3000L, result[0].createdAt)
+        assertEquals("b", result[1].text) // 他のメモは影響を受けない
+    }
+
+    @Test
+    fun edit_ignoresBlankInput() {
+        val original = listOf(Memo(1L, "old", createdAt = 1000L))
+        val result = MemoLogic.edit(original, id = 1L, text = "   ", editedAt = 3000L)
+        assertEquals(1, result.size)
+        assertEquals("old", result[0].text) // 変更されていない
+        assertEquals(1000L, result[0].createdAt)
+    }
+
+    @Test
+    fun edit_noMatchKeepsAll() {
+        val original = listOf(Memo(1L, "a", createdAt = 1000L))
+        val result = MemoLogic.edit(original, id = 99L, text = "new", editedAt = 3000L)
+        assertEquals(1, result.size)
+        assertEquals("a", result[0].text) // 変更されていない
+    }
 }
