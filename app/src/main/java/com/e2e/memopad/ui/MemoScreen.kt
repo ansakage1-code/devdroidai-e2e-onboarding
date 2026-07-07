@@ -65,7 +65,6 @@ fun MemoScreen(
     var editText by remember { mutableStateOf("") }
 
     Scaffold(
-        topAppBar = { },
         modifier = modifier.fillMaxSize(),
         topBar = { TopAppBar(title = { Text(stringResource(R.string.app_name)) }) },
     ) { padding ->
