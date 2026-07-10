@@ -8,6 +8,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.e2e.memopad.domain.Category
 import com.e2e.memopad.domain.Memo
 import com.e2e.memopad.domain.MemoLogic
 import com.e2e.memopad.ui.MemoScreen
@@ -67,6 +68,7 @@ private class MemoStore(context: Context) {
                     id = o.getLong("id"),
                     text = o.getString("text"),
                     createdAt = o.optLong("createdAt", 0L),
+                    category = Category.fromString(o.optString("category", Category.WORK.name)),
                 )
             }
         }.getOrDefault(emptyList())
@@ -75,7 +77,13 @@ private class MemoStore(context: Context) {
     fun save(memos: List<Memo>) {
         val arr = JSONArray()
         memos.forEach { m ->
-            arr.put(JSONObject().put("id", m.id).put("text", m.text).put("createdAt", m.createdAt))
+            arr.put(
+                JSONObject()
+                    .put("id", m.id)
+                    .put("text", m.text)
+                    .put("createdAt", m.createdAt)
+                    .put("category", m.category.name)
+            )
         }
         prefs.edit().putString(KEY, arr.toString()).apply()
     }
