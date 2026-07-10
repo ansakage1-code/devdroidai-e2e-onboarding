@@ -34,6 +34,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.e2e.memopad.R
 import com.e2e.memopad.domain.Memo
 import java.text.SimpleDateFormat
@@ -161,7 +162,11 @@ private fun MemoRow(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = memo.text,
-                    modifier = Modifier.padding(vertical = 8.dp),
+                    modifier = Modifier.padding(vertical = 12.dp),
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        fontSize = 18.sp,
+                        lineHeight = 28.sp,
+                    ),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
