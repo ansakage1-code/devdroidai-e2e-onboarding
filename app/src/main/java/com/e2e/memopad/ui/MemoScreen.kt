@@ -2,6 +2,7 @@ package com.e2e.memopad.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -96,12 +97,12 @@ fun MemoScreen(
             Spacer(modifier = Modifier.height(4.dp))
 
             if (memos.isEmpty()) {
-                Text(
-                    text = stringResource(R.string.empty_hint),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 32.dp),
-                )
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(text = stringResource(R.string.empty_hint))
+                }
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
