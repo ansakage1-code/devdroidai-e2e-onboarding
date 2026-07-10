@@ -6,11 +6,13 @@ package com.e2e.memopad.domain
  * @param id        一意の識別子（削除時の対象特定に使う）
  * @param text      メモ本文
  * @param createdAt 作成日時（ミリ秒単位の UNIX タイムスタンプ）
+ * @param category  メモのカテゴリ（デフォルトは WORK）
  */
 data class Memo(
     val id: Long,
     val text: String,
     val createdAt: Long = 0L,
+    val category: Category = Category.WORK,
 )
 
 /**
@@ -25,10 +27,10 @@ object MemoLogic {
      * 末尾に 1 件追加した新しいリストを返す。
      * 空白のみ（trim 後に空）の text は追加しない（元のリストをそのまま返す）。
      */
-    fun add(memos: List<Memo>, text: String, id: Long, createdAt: Long): List<Memo> {
+    fun add(memos: List<Memo>, text: String, id: Long, createdAt: Long, category: Category = Category.WORK): List<Memo> {
         val trimmed = text.trim()
         if (trimmed.isEmpty()) return memos
-        return memos + Memo(id = id, text = trimmed, createdAt = createdAt)
+        return memos + Memo(id = id, text = trimmed, createdAt = createdAt, category = category)
     }
 
     /**
