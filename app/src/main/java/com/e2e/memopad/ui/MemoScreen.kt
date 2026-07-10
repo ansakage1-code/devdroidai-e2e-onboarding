@@ -1,6 +1,7 @@
 package com.e2e.memopad.ui
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -31,6 +32,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -147,10 +149,28 @@ private fun MemoRow(
     onDelete: () -> Unit,
     onEdit: (String) -> Unit,
 ) {
+    var isDragging by remember { mutableStateOf(false) }
+    
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onEdit(memo.text) },
+            .clickable(enabled = !isDragging) { onEdit(memo.text) }
+            .pointerInput(Unit) {
+                detectDragGestures(
+                    onDrag = { change, dragAmount ->
+                        change.consume()
+                        // dragAmount.x が負数 = 左スワイプ
+                        // 累積ドラッグ距離が -100dp 以上（左方向）で削除
+                        if (dragAmount.x < -100.dp.toPx()) {
+                            isDragging = true
+                            onDelete()
+                        }
+                    },
+                    onDragEnd = {
+                        isDragging = false
+                    },
+                )
+            },
     ) {
         Row(
             modifier = Modifier
