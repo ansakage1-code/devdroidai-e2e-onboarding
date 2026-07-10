@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -35,16 +36,17 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.e2e.memopad.R
+import com.e2e.memopad.domain.Category
 import com.e2e.memopad.domain.Memo
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
 /**
- * メモ帳の画面。入力欄 + 追加ボタン + メモ一覧。
+ * メモ帳の画面。入力欄 + 追加ボタン + フィルタータブ + メモ一覧。
  *
- * ローカル状態として editingMemoId と editText を持ち、
- * 編集ダイアログの表示/非表示と入力内容を管理します。
+ * ローカル状態として editingMemoId, editText, selectedCategory を持ち、
+ * 編集ダイアログの表示/非表示、入力内容、カテゴリフィルタを管理します。
  *
  * グローバル状態（memos, input）は呼び出し側（MainActivity）から受け取ります。
  */
@@ -63,13 +65,22 @@ fun MemoScreen(
     var editingMemoId by remember { mutableStateOf<Long?>(null) }
     // ローカル状態：編集テキスト
     var editText by remember { mutableStateOf("") }
+    // ローカル状態：選択中のカテゴリフィルタ（null なら全て）
+    var selectedCategory by remember { mutableStateOf<Category?>(null) }
+
+    // フィルタリング済みメモリスト
+    val filteredMemos = if (selectedCategory == null) {
+        memos
+    } else {
+        memos.filter { it.category == selectedCategory }
+    }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = { 
             TopAppBar(
                 title = { 
-                    Text("${stringResource(R.string.app_name)} (${memos.size}件)")
+                    Text("${stringResource(R.string.app_name)} (${filteredMemos.size}件)")
                 }
             )
         },
@@ -93,9 +104,33 @@ fun MemoScreen(
                     Text(stringResource(R.string.add_button))
                 }
             }
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // カテゴリフィルタータブ
+            LazyRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                item {
+                    CategoryTab(
+                        label = "全て",
+                        isSelected = selectedCategory == null,
+                        onClick = { selectedCategory = null },
+                    )
+                }
+                items(Category.all()) { category ->
+                    CategoryTab(
+                        label = category.displayName,
+                        isSelected = selectedCategory == category,
+                        onClick = { selectedCategory = category },
+                    )
+                }
+            }
             Spacer(modifier = Modifier.height(4.dp))
 
-            if (memos.isEmpty()) {
+            if (filteredMemos.isEmpty()) {
                 Text(
                     text = stringResource(R.string.empty_hint),
                     modifier = Modifier
@@ -108,7 +143,7 @@ fun MemoScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     contentPadding = PaddingValues(top = 12.dp),
                 ) {
-                    items(memos.sortedByDescending { it.createdAt }, key = { it.id }) { memo ->
+                    items(filteredMemos.sortedByDescending { it.createdAt }, key = { it.id }) { memo ->
                         MemoRow(
                             memo = memo,
                             onDelete = { onDelete(memo.id) },
@@ -138,6 +173,36 @@ fun MemoScreen(
                 },
             )
         }
+    }
+}
+
+@Composable
+private fun CategoryTab(
+    label: String,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val backgroundColor = if (isSelected) {
+        MaterialTheme.colorScheme.primary
+    } else {
+        MaterialTheme.colorScheme.surfaceVariant
+    }
+    val textColor = if (isSelected) {
+        MaterialTheme.colorScheme.onPrimary
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    }
+
+    Button(
+        onClick = onClick,
+        modifier = modifier,
+        colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+            containerColor = backgroundColor,
+            contentColor = textColor,
+        ),
+    ) {
+        Text(label)
     }
 }
 
