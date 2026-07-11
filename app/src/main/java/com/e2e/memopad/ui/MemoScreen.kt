@@ -13,10 +13,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Push
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -57,6 +61,7 @@ fun MemoScreen(
     onAdd: () -> Unit,
     onDelete: (Long) -> Unit,
     onEdit: (id: Long, newText: String) -> Unit,
+    onTogglePin: (Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     // ローカル状態：編集中のメモID（null なら非表示）
@@ -108,7 +113,11 @@ fun MemoScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     contentPadding = PaddingValues(top = 12.dp),
                 ) {
-                    items(memos.sortedByDescending { it.createdAt }, key = { it.id }) { memo ->
+                    // ピン留め順 → 作成日時の降順でソート
+                    items(
+                        memos.sortedWith(compareBy({ !it.isPinned }, { -it.createdAt })),
+                        key = { it.id }
+                    ) { memo ->
                         MemoRow(
                             memo = memo,
                             onDelete = { onDelete(memo.id) },
@@ -116,6 +125,7 @@ fun MemoScreen(
                                 editingMemoId = memo.id
                                 editText = text
                             },
+                            onTogglePin = { onTogglePin(memo.id) },
                         )
                     }
                 }
@@ -146,6 +156,7 @@ private fun MemoRow(
     memo: Memo,
     onDelete: () -> Unit,
     onEdit: (String) -> Unit,
+    onTogglePin: () -> Unit,
 ) {
     Card(
         modifier = Modifier
@@ -170,6 +181,17 @@ private fun MemoRow(
                     modifier = Modifier.padding(bottom = 8.dp),
                     style = MaterialTheme.typography.labelSmall,
                     color = Color.Gray,
+                )
+            }
+            IconButton(
+                onClick = onTogglePin,
+                modifier = Modifier.padding(8.dp),
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Push,
+                    contentDescription = "Toggle pin",
+                    tint = if (memo.isPinned) MaterialTheme.colorScheme.primary else Color.Gray,
+                    modifier = Modifier.padding(4.dp),
                 )
             }
             TextButton(onClick = onDelete) {
