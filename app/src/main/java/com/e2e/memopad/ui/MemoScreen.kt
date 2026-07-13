@@ -37,7 +37,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.e2e.memopad.R
 import com.e2e.memopad.domain.Memo
-import com.e2e.memopad.ui.theme.LightBlue
+import com.e2e.memopad.ui.theme.LightGreen
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -153,7 +153,7 @@ private fun MemoRow(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onEdit(memo.text) },
-        colors = CardDefaults.cardColors(containerColor = LightBlue),
+        colors = CardDefaults.cardColors(containerColor = LightGreen),
     ) {
         Row(
             modifier = Modifier
