@@ -67,6 +67,7 @@ private class MemoStore(context: Context) {
                     id = o.getLong("id"),
                     text = o.getString("text"),
                     createdAt = o.optLong("createdAt", 0L),
+                    isPinned = o.optBoolean("isPinned", false),
                 )
             }
         }.getOrDefault(emptyList())
@@ -75,7 +76,11 @@ private class MemoStore(context: Context) {
     fun save(memos: List<Memo>) {
         val arr = JSONArray()
         memos.forEach { m ->
-            arr.put(JSONObject().put("id", m.id).put("text", m.text).put("createdAt", m.createdAt))
+            arr.put(JSONObject()
+                .put("id", m.id)
+                .put("text", m.text)
+                .put("createdAt", m.createdAt)
+                .put("isPinned", m.isPinned))
         }
         prefs.edit().putString(KEY, arr.toString()).apply()
     }

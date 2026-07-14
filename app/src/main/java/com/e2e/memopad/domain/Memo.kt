@@ -6,11 +6,13 @@ package com.e2e.memopad.domain
  * @param id        一意の識別子（削除時の対象特定に使う）
  * @param text      メモ本文
  * @param createdAt 作成日時（ミリ秒単位の UNIX タイムスタンプ）
+ * @param isPinned  ピン留めの状態（true = ピン留めされている、false = 通常）
  */
 data class Memo(
     val id: Long,
     val text: String,
     val createdAt: Long = 0L,
+    val isPinned: Boolean = false,
 )
 
 /**
