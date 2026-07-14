@@ -40,3 +40,5 @@
 ./gradlew assembleDebug
 ```
 （Android SDK が必要です。`local.properties` は各自のローカルにのみ置き、コミットしないでください。）
+
+<!-- run_log smoke test -->
