@@ -37,6 +37,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.e2e.memopad.R
 import com.e2e.memopad.domain.Memo
+import com.e2e.memopad.domain.MemoLogic
 import com.e2e.memopad.ui.theme.LightGreen
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -105,12 +106,16 @@ fun MemoScreen(
                         .padding(top = 32.dp),
                 )
             } else {
+                // メモリ化：memos が変わらない場合は再計算しない
+                val sortedMemos = remember(memos) {
+                    MemoLogic.sortByCreatedAtDesc(memos)
+                }
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     contentPadding = PaddingValues(top = 12.dp),
                 ) {
-                    items(memos.sortedByDescending { it.createdAt }, key = { it.id }) { memo ->
+                    items(sortedMemos, key = { it.id }) { memo ->
                         MemoRow(
                             memo = memo,
                             onDelete = { onDelete(memo.id) },
@@ -169,7 +174,7 @@ private fun MemoRow(
                     overflow = TextOverflow.Ellipsis,
                 )
                 Text(
-                    text = SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.getDefault()).format(Date(memo.createdAt)),
+                    text = formatMemoDateWithRelativeTime(memo.createdAt),
                     modifier = Modifier.padding(bottom = 8.dp),
                     style = MaterialTheme.typography.labelSmall,
                     color = Color.Gray,
@@ -212,4 +217,55 @@ private fun EditMemoDialog(
             }
         },
     )
+}
+
+/**
+ * メモの作成日時を日本語ローカライズされたフォーマットで表示します。
+ * 相対時間（「1時間前」など）も併せて表示します。
+ * 例: "7月15日 14:30 (1時間前)"
+ *
+ * @param createdAtMillis メモの作成時刻（ミリ秒）
+ * @return フォーマット済みの日時文字列
+ */
+private fun formatMemoDateWithRelativeTime(createdAtMillis: Long): String {
+    val createdDate = Date(createdAtMillis)
+    val currentTime = System.currentTimeMillis()
+    
+    // 日本語フォーマット（M月d日 HH:mm 形式）
+    val dateFormatter = SimpleDateFormat("M月d日 HH:mm", Locale.JAPAN)
+    val formattedDate = dateFormatter.format(createdDate)
+    
+    // 相対時間を計算
+    val relativeTime = getRelativeTimeString(createdAtMillis, currentTime)
+    
+    return "$formattedDate ($relativeTime)"
+}
+
+/**
+ * 2つの時刻の差分から、日本語の相対時間文字列を返します。
+ * 例: "1時間前", "2日前", "1分前", "今"
+ *
+ * @param createdAtMillis 比較対象の時刻（ミリ秒）
+ * @param currentTimeMillis 現在時刻（ミリ秒）
+ * @return 相対時間を表す日本語文字列
+ */
+private fun getRelativeTimeString(createdAtMillis: Long, currentTimeMillis: Long): String {
+    val diffMillis = currentTimeMillis - createdAtMillis
+    
+    // ミリ秒を分・時間・日に変換
+    val diffMinutes = diffMillis / (1000 * 60)
+    val diffHours = diffMillis / (1000 * 60 * 60)
+    val diffDays = diffMillis / (1000 * 60 * 60 * 24)
+    
+    return when {
+        diffMinutes < 1 -> "今"
+        diffMinutes < 60 -> "${diffMinutes}分前"
+        diffHours < 24 -> "${diffHours}時間前"
+        diffDays < 7 -> "${diffDays}日前"
+        else -> {
+            // 7日以上前は日付フォーマットで表示
+            val dateFormatter = SimpleDateFormat("M月d日", Locale.JAPAN)
+            dateFormatter.format(Date(createdAtMillis))
+        }
+    }
 }

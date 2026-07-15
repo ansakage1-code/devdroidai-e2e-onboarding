@@ -51,4 +51,12 @@ object MemoLogic {
             if (memo.id == id) memo.copy(text = trimmed) else memo
         }
     }
+
+    /**
+     * createdAt フィールドに基づいて新しい順（降順）にメモを並べ替えた新しいリストを返す。
+     * 元のリストは変更しない（immutable）。
+     */
+    fun sortByCreatedAtDesc(memos: List<Memo>): List<Memo> {
+        return memos.sortedByDescending { it.createdAt }
+    }
 }

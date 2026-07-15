@@ -85,4 +85,45 @@ class ExampleUnitTest {
         assertEquals("a", original[0].text) // 元のリストは不変
         assertEquals("b", result[0].text)
     }
+
+    @Test
+    fun sortByCreatedAtDesc_sortsInDescendingOrder() {
+        val memos = listOf(
+            Memo(1L, "最初", createdAt = 1000L),
+            Memo(2L, "2番目", createdAt = 3000L),
+            Memo(3L, "3番目", createdAt = 2000L)
+        )
+        val result = MemoLogic.sortByCreatedAtDesc(memos)
+        assertEquals(3, result.size)
+        assertEquals(3000L, result[0].createdAt) // 最も新しい順
+        assertEquals(2000L, result[1].createdAt)
+        assertEquals(1000L, result[2].createdAt) // 最も古い順
+    }
+
+    @Test
+    fun sortByCreatedAtDesc_emptyListReturnsEmpty() {
+        val result = MemoLogic.sortByCreatedAtDesc(emptyList())
+        assertTrue(result.isEmpty())
+    }
+
+    @Test
+    fun sortByCreatedAtDesc_singleItemReturnsSingleItem() {
+        val memos = listOf(Memo(1L, "テスト", createdAt = 1000L))
+        val result = MemoLogic.sortByCreatedAtDesc(memos)
+        assertEquals(1, result.size)
+        assertEquals(1000L, result[0].createdAt)
+    }
+
+    @Test
+    fun sortByCreatedAtDesc_isImmutable() {
+        val original = listOf(
+            Memo(1L, "a", createdAt = 1000L),
+            Memo(2L, "b", createdAt = 2000L)
+        )
+        val result = MemoLogic.sortByCreatedAtDesc(original)
+        assertEquals(2000L, original[0].createdAt) // 元のリストは並び替わっていない
+        assertEquals(1000L, original[1].createdAt)
+        assertEquals(2000L, result[0].createdAt) // 返されたリストは並び替わっている
+        assertEquals(1000L, result[1].createdAt)
+    }
 }
