@@ -1,5 +1,6 @@
 package com.e2e.memopad.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,18 +14,25 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -144,42 +152,99 @@ fun MemoScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun MemoRow(
     memo: Memo,
     onDelete: () -> Unit,
     onEdit: (String) -> Unit,
 ) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onEdit(memo.text) },
-        colors = CardDefaults.cardColors(containerColor = LightGreen),
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 16.dp, end = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = memo.text,
-                    modifier = Modifier.padding(vertical = 8.dp),
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                )
-                Text(
-                    text = SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.getDefault()).format(Date(memo.createdAt)),
-                    modifier = Modifier.padding(bottom = 8.dp),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = Color.Gray,
+    // スワイプ状態を管理
+    val swipeToDismissBoxState = rememberSwipeToDismissBoxState()
+    
+    // 削除確認ダイアログの表示状態
+    var showDeleteConfirmation by remember { mutableStateOf(false) }
+
+    SwipeToDismissBox(
+        state = swipeToDismissBoxState,
+        backgroundContent = {
+            // スワイプ時の背景（赤色で削除アイコンを表示）
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.Red)
+                    .padding(end = 16.dp),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = stringResource(R.string.delete_desc),
+                    tint = Color.White,
                 )
             }
-            TextButton(onClick = onDelete) {
-                Text(stringResource(R.string.delete_button))
+        },
+        content = {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onEdit(memo.text) },
+                colors = CardDefaults.cardColors(containerColor = LightGreen),
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, end = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = memo.text,
+                            modifier = Modifier.padding(vertical = 8.dp),
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                        Text(
+                            text = SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.getDefault()).format(Date(memo.createdAt)),
+                            modifier = Modifier.padding(bottom = 8.dp),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color.Gray,
+                        )
+                    }
+                    TextButton(onClick = {
+                        showDeleteConfirmation = true
+                    }) {
+                        Text(stringResource(R.string.delete_button))
+                    }
+                }
             }
-        }
+        },
+    )
+
+    // スワイプが完了したら（EndToStart）、削除確認ダイアログを表示
+    if (swipeToDismissBoxState.currentValue == SwipeToDismissBoxValue.EndToStart && !showDeleteConfirmation) {
+        showDeleteConfirmation = true
+    }
+
+    // 削除確認ダイアログ
+    if (showDeleteConfirmation) {
+        DeleteConfirmationDialog(
+            onConfirm = {
+                onDelete()
+                showDeleteConfirmation = false
+                // スワイプ状態をリセット（LaunchedEffect で非同期に実行）
+                LaunchedEffect(Unit) {
+                    swipeToDismissBoxState.reset()
+                }
+            },
+            onCancel = {
+                showDeleteConfirmation = false
+                // スワイプ状態をリセット（LaunchedEffect で非同期に実行）
+                LaunchedEffect(Unit) {
+                    swipeToDismissBoxState.reset()
+                }
+            },
+        )
     }
 }
 
@@ -205,6 +270,28 @@ private fun EditMemoDialog(
         confirmButton = {
             Button(onClick = onSave, enabled = text.isNotBlank()) {
                 Text(stringResource(R.string.save_button))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onCancel) {
+                Text(stringResource(R.string.cancel_button))
+            }
+        },
+    )
+}
+
+@Composable
+private fun DeleteConfirmationDialog(
+    onConfirm: () -> Unit,
+    onCancel: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onCancel,
+        title = { Text(stringResource(R.string.delete_confirm_title)) },
+        text = { Text(stringResource(R.string.delete_confirm_message)) },
+        confirmButton = {
+            Button(onClick = onConfirm) {
+                Text(stringResource(R.string.delete_button))
             }
         },
         dismissButton = {
