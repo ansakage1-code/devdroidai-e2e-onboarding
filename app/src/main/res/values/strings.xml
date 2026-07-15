@@ -4,6 +4,8 @@
     <string name="add_button">追加</string>
     <string name="delete_button">削除</string>
     <string name="delete_desc">このメモを削除</string>
+    <string name="delete_confirm_title">メモを削除</string>
+    <string name="delete_confirm_message">本当にこのメモを削除しますか？</string>
     <string name="empty_hint">まだメモがありません。上の欄から追加してください。</string>
     <string name="edit_title">メモを編集</string>
     <string name="edit_hint">メモを編集</string>
