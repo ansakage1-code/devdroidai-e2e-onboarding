@@ -1,5 +1,7 @@
 package com.e2e.memopad.ui
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -10,6 +12,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -35,6 +38,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.input.pointer.pointerInput
@@ -171,9 +175,30 @@ private fun MemoRow(
     // スワイプに応じて背景色をアニメーション（LightGreen → Red）
     val backgroundColor = lerp(LightGreen, Color.Red, swipeProgress)
 
+    // 削除時のスライドアウトアニメーション（右方向）
+    val deleteOffsetAnim by animateFloatAsState(
+        targetValue = if (isDeleting) 100f else 0f,
+        animationSpec = tween(durationMillis = 300),
+        finishedListener = {
+            if (isDeleting) {
+                onDelete()
+            }
+        },
+        label = "deleteOffset"
+    )
+
+    // 削除時のフェードアウトアニメーション
+    val deleteAlphaAnim by animateFloatAsState(
+        targetValue = if (isDeleting) 0f else 1f,
+        animationSpec = tween(durationMillis = 300),
+        label = "deleteAlpha"
+    )
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .alpha(deleteAlphaAnim)
+            .offset(x = deleteOffsetAnim.dp)
             .clickable(enabled = !isDeleting && swipeProgress == 0f) { onEdit(memo.text) }
             .pointerInput(Unit) {
                 detectHorizontalDragGestures(
@@ -188,7 +213,6 @@ private fun MemoRow(
                         // スワイプが左方向（負の値）で閾値を超えたら削除実行
                         if (!isDeleting && swipeOffset < -swipeThreshold) {
                             isDeleting = true
-                            onDelete()
                         }
                         swipeOffset = 0f
                     }
@@ -225,7 +249,7 @@ private fun MemoRow(
                     tint = Color.White,
                 )
             } else {
-                TextButton(onClick = onDelete) {
+                TextButton(onClick = { isDeleting = true }) {
                     Text(stringResource(R.string.delete_button))
                 }
             }
