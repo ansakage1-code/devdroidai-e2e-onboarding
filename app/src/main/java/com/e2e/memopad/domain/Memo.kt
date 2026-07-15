@@ -51,4 +51,12 @@ object MemoLogic {
             if (memo.id == id) memo.copy(text = trimmed) else memo
         }
     }
+
+    /**
+     * メモリストを createdAt の降順（新しい順）でソートした新しいリストを返す。
+     * 入力リストは変更しない（immutable）。
+     */
+    fun sortByNewest(memos: List<Memo>): List<Memo> {
+        return memos.sortedByDescending { it.createdAt }
+    }
 }
