@@ -85,4 +85,47 @@ class ExampleUnitTest {
         assertEquals("a", original[0].text) // 元のリストは不変
         assertEquals("b", result[0].text)
     }
+
+    @Test
+    fun sortByNewest_sortsByCreatedAtDescending() {
+        val memos = listOf(
+            Memo(1L, "oldest", createdAt = 1000L),
+            Memo(2L, "middle", createdAt = 2000L),
+            Memo(3L, "newest", createdAt = 3000L)
+        )
+        val result = MemoLogic.sortByNewest(memos)
+        assertEquals(3, result.size)
+        // 新しい順（降順）に並んでいることを確認
+        assertEquals(3L, result[0].id)
+        assertEquals(2L, result[1].id)
+        assertEquals(1L, result[2].id)
+    }
+
+    @Test
+    fun sortByNewest_isImmutable() {
+        val original = listOf(
+            Memo(1L, "a", createdAt = 1000L),
+            Memo(2L, "b", createdAt = 2000L)
+        )
+        val result = MemoLogic.sortByNewest(original)
+        assertEquals(1000L, original[0].createdAt) // 元のリストは不変
+        assertEquals(2000L, original[1].createdAt)
+        assertEquals(2000L, result[0].createdAt) // 新しい方が先
+        assertEquals(1000L, result[1].createdAt)
+    }
+
+    @Test
+    fun sortByNewest_withSingleMemo() {
+        val memos = listOf(Memo(1L, "single", createdAt = 1000L))
+        val result = MemoLogic.sortByNewest(memos)
+        assertEquals(1, result.size)
+        assertEquals(1L, result[0].id)
+    }
+
+    @Test
+    fun sortByNewest_withEmptyList() {
+        val memos = emptyList<Memo>()
+        val result = MemoLogic.sortByNewest(memos)
+        assertTrue(result.isEmpty())
+    }
 }
