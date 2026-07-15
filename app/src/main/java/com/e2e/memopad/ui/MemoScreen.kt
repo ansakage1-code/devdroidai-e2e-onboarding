@@ -37,6 +37,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.e2e.memopad.R
 import com.e2e.memopad.domain.Memo
+import com.e2e.memopad.domain.MemoLogic
 import com.e2e.memopad.ui.theme.LightGreen
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -110,7 +111,7 @@ fun MemoScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     contentPadding = PaddingValues(top = 12.dp),
                 ) {
-                    items(memos.sortedByDescending { it.createdAt }, key = { it.id }) { memo ->
+                    items(MemoLogic.sortByNewest(memos), key = { it.id }) { memo ->
                         MemoRow(
                             memo = memo,
                             onDelete = { onDelete(memo.id) },
