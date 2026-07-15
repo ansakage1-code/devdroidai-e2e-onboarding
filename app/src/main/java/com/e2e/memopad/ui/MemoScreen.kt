@@ -1,6 +1,7 @@
 package com.e2e.memopad.ui
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -32,6 +33,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -150,10 +153,33 @@ private fun MemoRow(
     onDelete: () -> Unit,
     onEdit: (String) -> Unit,
 ) {
+    var swipeOffset by remember { mutableStateOf(0f) }
+    var isDeleting by remember { mutableStateOf(false) }
+    val swipeThreshold = with(LocalDensity.current) { 100.dp.toPx() }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onEdit(memo.text) },
+            .clickable(enabled = !isDeleting) { onEdit(memo.text) }
+            .pointerInput(Unit) {
+                detectHorizontalDragGestures(
+                    onHorizontalDrag = { change, dragAmount ->
+                        change.consume()
+                        // スワイプ中にオフセットを更新（削除実行中は無視）
+                        if (!isDeleting) {
+                            swipeOffset += dragAmount
+                        }
+                    },
+                    onDragEnd = {
+                        // スワイプが左方向（負の値）で閾値を超えたら削除実行
+                        if (!isDeleting && swipeOffset < -swipeThreshold) {
+                            isDeleting = true
+                            onDelete()
+                        }
+                        swipeOffset = 0f
+                    }
+                )
+            },
         colors = CardDefaults.cardColors(containerColor = LightGreen),
     ) {
         Row(
