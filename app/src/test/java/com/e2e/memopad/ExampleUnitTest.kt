@@ -85,4 +85,48 @@ class ExampleUnitTest {
         assertEquals("a", original[0].text) // 元のリストは不変
         assertEquals("b", result[0].text)
     }
+
+    @Test
+    fun sortByNewest_sortsInDescendingOrder() {
+        val memos = listOf(
+            Memo(1L, "最初に作成", createdAt = 1000L),
+            Memo(2L, "2番目に作成", createdAt = 3000L),
+            Memo(3L, "最後に作成", createdAt = 2000L),
+        )
+        val result = MemoLogic.sortByNewest(memos)
+        assertEquals(3, result.size)
+        assertEquals(3000L, result[0].createdAt) // 最も新しい（createdAt が大きい）ものが最初
+        assertEquals(2000L, result[1].createdAt)
+        assertEquals(1000L, result[2].createdAt) // 最も古いものが最後
+    }
+
+    @Test
+    fun sortByNewest_emptyListReturnsEmpty() {
+        val result = MemoLogic.sortByNewest(emptyList())
+        assertTrue(result.isEmpty())
+    }
+
+    @Test
+    fun sortByNewest_singleMemoReturnsItself() {
+        val memos = listOf(Memo(1L, "買い物", createdAt = 1000L))
+        val result = MemoLogic.sortByNewest(memos)
+        assertEquals(1, result.size)
+        assertEquals(1L, result[0].id)
+        assertEquals("買い物", result[0].text)
+    }
+
+    @Test
+    fun sortByNewest_isImmutable() {
+        val original = listOf(
+            Memo(1L, "古い", createdAt = 1000L),
+            Memo(2L, "新しい", createdAt = 2000L),
+        )
+        val result = MemoLogic.sortByNewest(original)
+        // 元のリストの順序は変わらず
+        assertEquals(1L, original[0].id)
+        assertEquals(2L, original[1].id)
+        // 結果のリストはソート済み
+        assertEquals(2L, result[0].id)
+        assertEquals(1L, result[1].id)
+    }
 }

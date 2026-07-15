@@ -1,6 +1,9 @@
 package com.e2e.memopad.ui
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -9,15 +12,19 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -31,12 +38,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.e2e.memopad.R
 import com.e2e.memopad.domain.Memo
+import com.e2e.memopad.domain.MemoLogic
 import com.e2e.memopad.ui.theme.LightGreen
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -110,7 +122,7 @@ fun MemoScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     contentPadding = PaddingValues(top = 12.dp),
                 ) {
-                    items(memos.sortedByDescending { it.createdAt }, key = { it.id }) { memo ->
+                    items(MemoLogic.sortByNewest(memos), key = { it.id }) { memo ->
                         MemoRow(
                             memo = memo,
                             onDelete = { onDelete(memo.id) },
@@ -149,11 +161,64 @@ private fun MemoRow(
     onDelete: () -> Unit,
     onEdit: (String) -> Unit,
 ) {
+    var swipeOffset by remember { mutableStateOf(0f) }
+    var isDeleting by remember { mutableStateOf(false) }
+    val swipeThreshold = with(LocalDensity.current) { 100.dp.toPx() }
+
+    // スワイプ進度を計算（0f ～ 1f）
+    val swipeProgress = if (swipeOffset < 0f) {
+        (-swipeOffset / swipeThreshold).coerceIn(0f, 1f)
+    } else {
+        0f
+    }
+
+    // スワイプに応じて背景色をアニメーション（LightGreen → Red）
+    val backgroundColor = lerp(LightGreen, Color.Red, swipeProgress)
+
+    // 削除時のスライドアウトアニメーション（右方向）
+    val deleteOffsetAnim by animateFloatAsState(
+        targetValue = if (isDeleting) 100f else 0f,
+        animationSpec = tween(durationMillis = 300),
+        finishedListener = {
+            if (isDeleting) {
+                onDelete()
+            }
+        },
+        label = "deleteOffset"
+    )
+
+    // 削除時のフェードアウトアニメーション
+    val deleteAlphaAnim by animateFloatAsState(
+        targetValue = if (isDeleting) 0f else 1f,
+        animationSpec = tween(durationMillis = 300),
+        label = "deleteAlpha"
+    )
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onEdit(memo.text) },
-        colors = CardDefaults.cardColors(containerColor = LightGreen),
+            .alpha(deleteAlphaAnim)
+            .offset(x = deleteOffsetAnim.dp)
+            .clickable(enabled = !isDeleting && swipeProgress == 0f) { onEdit(memo.text) }
+            .pointerInput(Unit) {
+                detectHorizontalDragGestures(
+                    onHorizontalDrag = { change, dragAmount ->
+                        change.consume()
+                        // スワイプ中にオフセットを更新（削除実行中は無視）
+                        if (!isDeleting) {
+                            swipeOffset += dragAmount
+                        }
+                    },
+                    onDragEnd = {
+                        // スワイプが左方向（負の値）で閾値を超えたら削除実行
+                        if (!isDeleting && swipeOffset < -swipeThreshold) {
+                            isDeleting = true
+                        }
+                        swipeOffset = 0f
+                    }
+                )
+            },
+        colors = CardDefaults.cardColors(containerColor = backgroundColor),
     ) {
         Row(
             modifier = Modifier
@@ -175,8 +240,18 @@ private fun MemoRow(
                     color = Color.Gray,
                 )
             }
-            TextButton(onClick = onDelete) {
-                Text(stringResource(R.string.delete_button))
+            // スワイプ中は削除アイコンを表示、そうでなければ削除ボタンを表示
+            if (swipeProgress > 0f) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = stringResource(R.string.delete_button),
+                    modifier = Modifier.padding(end = 8.dp),
+                    tint = Color.White,
+                )
+            } else {
+                TextButton(onClick = { isDeleting = true }) {
+                    Text(stringResource(R.string.delete_button))
+                }
             }
         }
     }
