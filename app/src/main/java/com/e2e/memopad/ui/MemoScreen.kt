@@ -38,10 +38,10 @@ import androidx.compose.ui.unit.dp
 import com.e2e.memopad.R
 import com.e2e.memopad.domain.Memo
 import com.e2e.memopad.ui.theme.DarkNavy
-import com.e2e.memopad.ui.theme.LightGreen
 import com.e2e.memopad.ui.theme.White
 import com.e2e.memopad.ui.theme.LightGray
 import com.e2e.memopad.ui.theme.DarkGray
+import com.e2e.memopad.ui.theme.MemoCardDarkGray
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -162,7 +162,7 @@ private fun MemoRow(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onEdit(memo.text) },
-        colors = CardDefaults.cardColors(containerColor = LightGreen),
+        colors = CardDefaults.cardColors(containerColor = MemoCardDarkGray),
     ) {
         Row(
             modifier = Modifier
@@ -176,13 +176,13 @@ private fun MemoRow(
                     modifier = Modifier.padding(vertical = 8.dp),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
-                    color = Color.Black,
+                    color = White,
                 )
                 Text(
                     text = SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.getDefault()).format(Date(memo.createdAt)),
                     modifier = Modifier.padding(bottom = 8.dp),
                     style = MaterialTheme.typography.labelSmall,
-                    color = DarkGray,
+                    color = LightGray,
                 )
             }
             TextButton(onClick = onDelete) {
