@@ -19,3 +19,6 @@ val DarkNavy = Color(0xFF001F3F)
 val White = Color(0xFFFFFFFF)
 val LightGray = Color(0xFFE0E0E0)
 val DarkGray = Color(0xFF666666)
+
+// メモカード背景色（ダークネイビー背景用）
+val MemoCardDarkGray = Color(0xFF3A3A3A)
