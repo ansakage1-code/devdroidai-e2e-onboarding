@@ -37,6 +37,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.e2e.memopad.R
 import com.e2e.memopad.domain.Memo
+import com.e2e.memopad.ui.theme.DarkNavy
 import com.e2e.memopad.ui.theme.LightGreen
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -68,6 +69,7 @@ fun MemoScreen(
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
+        containerColor = DarkNavy,
         topBar = { 
             TopAppBar(
                 title = { 
