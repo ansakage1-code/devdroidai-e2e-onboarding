@@ -14,3 +14,8 @@ val ButtonBlue = Color(0xFF007AFF)
 val LightBlue = Color(0xFFADD8E6)
 val LightGreen = Color(0xFF90EE90)
 val DarkNavy = Color(0xFF001F3F)
+
+// ダークネイビー背景用テキスト色
+val White = Color(0xFFFFFFFF)
+val LightGray = Color(0xFFE0E0E0)
+val DarkGray = Color(0xFF666666)
