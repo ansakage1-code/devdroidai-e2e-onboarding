@@ -12,16 +12,58 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 
+// ダークネイビー背景に最適化した色スキーム
 private val DarkColorScheme = darkColorScheme(
-    primary = Color(0xFF58A6FF),
-    secondary = Color(0xFF79C0FF),
-    tertiary = Color(0xFF79C0FF)
+    primary = ButtonBlue,           // #007AFF - ボタン・ハイライト用（高コントラスト）
+    onPrimary = White,              // プライマリー上のテキスト
+    primaryContainer = DarkNavy,    // プライマリーコンテナ背景
+    onPrimaryContainer = LightBlue, // コンテナ内テキスト
+    
+    secondary = LightBlue,          // #ADD8E6 - セカンダリーアクション
+    onSecondary = DarkNavy,         // セカンダリー上のテキスト
+    secondaryContainer = MemoCardDarkGray, // セカンダリーコンテナ
+    onSecondaryContainer = LightGray,      // コンテナ内テキスト
+    
+    tertiary = LightGreen,          // #90EE90 - サードアクセント
+    onTertiary = DarkNavy,          // 上のテキスト
+    tertiaryContainer = MemoCardDarkGray,  // コンテナ
+    onTertiaryContainer = LightGray,       // コンテナ内テキスト
+    
+    background = DarkNavy,          // #001F3F - 背景
+    onBackground = White,           // 背景上のテキスト
+    
+    surface = MemoCardDarkGray,     // #3A3A3A - カード・サーフェス
+    onSurface = White,              // サーフェス上のテキスト
+    
+    error = Color(0xFFFF6B6B),      // エラー色
+    onError = DarkNavy              // エラー上のテキスト
 )
 
+// ライトテーマ（標準的なライト背景用）
 private val LightColorScheme = lightColorScheme(
-    primary = Color(0xFF0969DA),
-    secondary = Color(0xFF0860CA),
-    tertiary = Color(0xFF0860CA)
+    primary = ButtonBlue,           // #007AFF - ボタン・ハイライト用
+    onPrimary = White,              // 上のテキスト
+    primaryContainer = Color(0xFFE3F2FD), // ライト背景のコンテナ
+    onPrimaryContainer = Color(0xFF003DA6), // コンテナ内テキスト
+    
+    secondary = Color(0xFF0860CA),  // セカンダリー
+    onSecondary = White,            // 上のテキスト
+    secondaryContainer = Color(0xFFD4E4FF), // ライトコンテナ
+    onSecondaryContainer = Color(0xFF003DA6), // コンテナ内テキスト
+    
+    tertiary = Color(0xFF0860CA),   // サード
+    onTertiary = White,             // 上のテキスト
+    tertiaryContainer = Color(0xFFD4E4FF), // ライトコンテナ
+    onTertiaryContainer = Color(0xFF003DA6), // コンテナ内テキスト
+    
+    background = Color(0xFFFAFAFA), // ライト背景
+    onBackground = Color(0xFF1C1C1C), // 背景上のテキスト
+    
+    surface = Color(0xFFFFFFFF),    // ライトサーフェス
+    onSurface = Color(0xFF1C1C1C),  // 上のテキスト
+    
+    error = Color(0xFFB3261E),      // エラー色
+    onError = Color(0xFFFFFFFF)     // エラー上のテキスト
 )
 
 @Composable
