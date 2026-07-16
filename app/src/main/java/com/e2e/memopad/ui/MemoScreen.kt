@@ -39,6 +39,9 @@ import com.e2e.memopad.R
 import com.e2e.memopad.domain.Memo
 import com.e2e.memopad.ui.theme.DarkNavy
 import com.e2e.memopad.ui.theme.LightGreen
+import com.e2e.memopad.ui.theme.White
+import com.e2e.memopad.ui.theme.LightGray
+import com.e2e.memopad.ui.theme.DarkGray
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -73,7 +76,10 @@ fun MemoScreen(
         topBar = { 
             TopAppBar(
                 title = { 
-                    Text("${stringResource(R.string.app_name)} (${memos.size}件)")
+                    Text(
+                        "${stringResource(R.string.app_name)} (${memos.size}件)",
+                        color = White
+                    )
                 }
             )
         },
@@ -90,7 +96,7 @@ fun MemoScreen(
                     onValueChange = onInputChange,
                     modifier = Modifier.weight(1f),
                     singleLine = true,
-                    label = { Text(stringResource(R.string.input_hint)) },
+                    label = { Text(stringResource(R.string.input_hint), color = LightGray) },
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Button(onClick = onAdd, enabled = input.isNotBlank()) {
@@ -105,6 +111,7 @@ fun MemoScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 32.dp),
+                    color = LightGray,
                 )
             } else {
                 LazyColumn(
@@ -169,12 +176,13 @@ private fun MemoRow(
                     modifier = Modifier.padding(vertical = 8.dp),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
+                    color = Color.Black,
                 )
                 Text(
                     text = SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.getDefault()).format(Date(memo.createdAt)),
                     modifier = Modifier.padding(bottom = 8.dp),
                     style = MaterialTheme.typography.labelSmall,
-                    color = Color.Gray,
+                    color = DarkGray,
                 )
             }
             TextButton(onClick = onDelete) {
@@ -193,14 +201,14 @@ private fun EditMemoDialog(
 ) {
     AlertDialog(
         onDismissRequest = onCancel,
-        title = { Text(stringResource(R.string.edit_title)) },
+        title = { Text(stringResource(R.string.edit_title), color = Color.Black) },
         text = {
             OutlinedTextField(
                 value = text,
                 onValueChange = onTextChange,
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = false,
-                label = { Text(stringResource(R.string.edit_hint)) },
+                label = { Text(stringResource(R.string.edit_hint), color = DarkGray) },
             )
         },
         confirmButton = {
