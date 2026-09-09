@@ -43,10 +43,10 @@ import java.util.Date
 import java.util.Locale
 
 /**
- * メモ帳の画面。入力欄 + 追加ボタン + メモ一覧。
+ * メモ帳の画面。入力欄 + 追加ボタン + 検索ボックス + メモ一覧。
  *
- * ローカル状態として editingMemoId と editText を持ち、
- * 編集ダイアログの表示/非表示と入力内容を管理します。
+ * ローカル状態として editingMemoId, editText, searchQuery を持ち、
+ * 編集ダイアログの表示/非表示、入力内容、検索キーワードを管理します。
  *
  * グローバル状態（memos, input）は呼び出し側（MainActivity）から受け取ります。
  */
@@ -65,13 +65,22 @@ fun MemoScreen(
     var editingMemoId by remember { mutableStateOf<Long?>(null) }
     // ローカル状態：編集テキスト
     var editText by remember { mutableStateOf("") }
+    // ローカル状態：検索キーワード
+    var searchQuery by remember { mutableStateOf("") }
+
+    // 検索キーワードでメモをフィルタリング
+    val filteredMemos = if (searchQuery.isEmpty()) {
+        memos
+    } else {
+        memos.filter { it.text.contains(searchQuery, ignoreCase = true) }
+    }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = { 
             TopAppBar(
                 title = { 
-                    Text("${stringResource(R.string.app_name)} (${memos.size}件)")
+                    Text("${stringResource(R.string.app_name)} (${filteredMemos.size}件)")
                 }
             )
         },
@@ -95,11 +104,25 @@ fun MemoScreen(
                     Text(stringResource(R.string.add_button))
                 }
             }
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
-            if (memos.isEmpty()) {
+            // 検索ボックス
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                label = { Text("メモを検索") },
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+
+            if (filteredMemos.isEmpty()) {
                 Text(
-                    text = stringResource(R.string.empty_hint),
+                    text = if (searchQuery.isEmpty()) {
+                        stringResource(R.string.empty_hint)
+                    } else {
+                        "検索結果がありません"
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 32.dp),
@@ -110,7 +133,7 @@ fun MemoScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     contentPadding = PaddingValues(top = 12.dp),
                 ) {
-                    items(memos.sortedByDescending { it.createdAt }, key = { it.id }) { memo ->
+                    items(filteredMemos.sortedByDescending { it.createdAt }, key = { it.id }) { memo ->
                         MemoRow(
                             memo = memo,
                             onDelete = { onDelete(memo.id) },
