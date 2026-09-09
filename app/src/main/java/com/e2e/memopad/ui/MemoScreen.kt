@@ -21,6 +21,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -105,20 +106,25 @@ fun MemoScreen(
                         .padding(top = 32.dp),
                 )
             } else {
-                LazyColumn(
+                Surface(
                     modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    contentPadding = PaddingValues(top = 12.dp),
+                    color = Color.LightGray,
                 ) {
-                    items(memos.sortedByDescending { it.createdAt }, key = { it.id }) { memo ->
-                        MemoRow(
-                            memo = memo,
-                            onDelete = { onDelete(memo.id) },
-                            onEdit = { text ->
-                                editingMemoId = memo.id
-                                editText = text
-                            },
-                        )
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        contentPadding = PaddingValues(top = 12.dp),
+                    ) {
+                        items(memos.sortedByDescending { it.createdAt }, key = { it.id }) { memo ->
+                            MemoRow(
+                                memo = memo,
+                                onDelete = { onDelete(memo.id) },
+                                onEdit = { text ->
+                                    editingMemoId = memo.id
+                                    editText = text
+                                },
+                            )
+                        }
                     }
                 }
             }
