@@ -6,11 +6,13 @@ package com.e2e.memopad.domain
  * @param id        一意の識別子（削除時の対象特定に使う）
  * @param text      メモ本文
  * @param createdAt 作成日時（ミリ秒単位の UNIX タイムスタンプ）
+ * @param isPinned  ピン留め状態（true でピン留められている）
  */
 data class Memo(
     val id: Long,
     val text: String,
     val createdAt: Long = 0L,
+    val isPinned: Boolean = false,
 )
 
 /**
@@ -28,7 +30,7 @@ object MemoLogic {
     fun add(memos: List<Memo>, text: String, id: Long, createdAt: Long): List<Memo> {
         val trimmed = text.trim()
         if (trimmed.isEmpty()) return memos
-        return memos + Memo(id = id, text = trimmed, createdAt = createdAt)
+        return memos + Memo(id = id, text = trimmed, createdAt = createdAt, isPinned = false)
     }
 
     /**
@@ -49,6 +51,16 @@ object MemoLogic {
         if (trimmed.isEmpty()) return memos
         return memos.map { memo ->
             if (memo.id == id) memo.copy(text = trimmed) else memo
+        }
+    }
+
+    /**
+     * 指定 id のメモのピン留め状態をトグルした新しいリストを返す。
+     * 該当 id が無ければ元と同じ内容のリストを返す。
+     */
+    fun togglePin(memos: List<Memo>, id: Long): List<Memo> {
+        return memos.map { memo ->
+            if (memo.id == id) memo.copy(isPinned = !memo.isPinned) else memo
         }
     }
 }
