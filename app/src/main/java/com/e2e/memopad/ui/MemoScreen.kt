@@ -59,6 +59,7 @@ fun MemoScreen(
     onAdd: () -> Unit,
     onDelete: (Long) -> Unit,
     onEdit: (id: Long, newText: String) -> Unit,
+    onPin: (Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     // ローカル状態：編集中のメモID（null なら非表示）
@@ -118,6 +119,7 @@ fun MemoScreen(
                                 editingMemoId = memo.id
                                 editText = text
                             },
+                            onPin = { onPin(memo.id) },
                         )
                     }
                 }
@@ -148,6 +150,7 @@ private fun MemoRow(
     memo: Memo,
     onDelete: () -> Unit,
     onEdit: (String) -> Unit,
+    onPin: () -> Unit,
 ) {
     Card(
         modifier = Modifier
@@ -174,6 +177,9 @@ private fun MemoRow(
                     style = MaterialTheme.typography.labelSmall,
                     color = Color.Gray,
                 )
+            }
+            TextButton(onClick = onPin) {
+                Text(if (memo.pinned) "解除" else "ピン")
             }
             TextButton(onClick = onDelete) {
                 Text(stringResource(R.string.delete_button))
